@@ -1,4 +1,5 @@
 10-Year Reliability Survival Simulator
+
 An educational reliability engineering simulator that shows how an annual failure rate affects asset reliability and the expected number of failed assets over time.
 The tool is designed to help reliability engineers, asset managers, business owners, and financial decision makers understand the relationship between:
 annual failure rate
