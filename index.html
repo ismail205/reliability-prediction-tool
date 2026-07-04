@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>10-Year Reliability Survival Simulator</title>
+
+  <meta
+    name="description"
+    content="Educational reliability simulator showing how annual failure rate affects reliability and expected failed assets over time."
+  />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <header class="hero">
+    <div class="container">
+      <p class="eyebrow">Reliability Engineering Education Tool</p>
+      <h1>10-Year Reliability Survival Simulator</h1>
+      <p class="intro">
+        Move the failure-rate slider to see how random failures with a constant annual failure rate
+        affect reliability and expected failed assets over time.
+      </p>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="disclaimer">
+      <strong>Educational disclaimer:</strong>
+      This simulator is for educational and conceptual explanation only. It assumes random failures
+      with a constant failure rate using an exponential distribution. It does not model ageing,
+      wear-out, infant mortality, repair cycles, replacements, maintenance interventions,
+      common-cause failures, or changing operating conditions. It should not be used as a formal
+      engineering, safety, financial, or investment decision-making tool.
+    </section>
+
+    <section class="layout">
+      <section class="card controls">
+        <h2>Inputs</h2>
+
+        <label class="field">
+          <span>Asset population</span>
+          <input id="assetPopulation" type="number" value="1000" min="1" step="1" />
+          <small>
+            Enter the number of similar assets in the population.
+          </small>
+        </label>
+
+        <div class="slider-box">
+          <div class="slider-header">
+            <label for="failureRateSlider">Annual failure rate per asset</label>
+            <strong id="failureRateDisplay">0.100 failures / asset / year</strong>
+          </div>
+
+          <input
+            id="failureRateSlider"
+            type="range"
+            min="0.001"
+            max="1"
+            value="0.10"
+            step="0.001"
+          />
+
+          <div class="slider-scale">
+            <span>0.001</span>
+            <span>0.50</span>
+            <span>1.00</span>
+          </div>
+
+          <p class="helper" id="failureRateHelper">
+            0.100 failures per asset per year is approximately 10.0 failures per 100 assets per year.
+          </p>
+        </div>
+
+        <label class="field">
+          <span>Mission period / analysis period</span>
+          <input id="missionYears" type="number" value="10" min="1" max="50" step="1" />
+          <small>
+            Default is 10 years. You can adjust the period if required.
+          </small>
+        </label>
+
+        <div class="button-row">
+          <button type="button" id="resetBtn">Reset example</button>
+          <button type="button" class="secondary" onclick="window.print()">Print</button>
+        </div>
+      </section>
+
+      <section class="results">
+        <section class="card result-card primary-result">
+          <p class="result-label">Reliability at end of period</p>
+          <div class="big-number" id="finalReliability">—</div>
+          <p class="result-subtitle" id="finalReliabilityText">
+            Probability one asset survives the period without failure.
+          </p>
+        </section>
+
+        <section class="card result-card">
+          <h2>Fleet Survival Results</h2>
+
+          <div class="metric-grid">
+            <div class="metric">
+              <span>Expected surviving assets</span>
+              <strong id="survivingAssets">—</strong>
+            </div>
+
+            <div class="metric">
+              <span>Expected failed assets</span>
+              <strong id="failedAssets">—</strong>
+            </div>
+
+            <div class="metric">
+              <span>Annual failure rate</span>
+              <strong id="lambdaPerYear">—</strong>
+            </div>
+
+            <div class="metric">
+              <span>Equivalent MTBF</span>
+              <strong id="mtbf">—</strong>
+            </div>
+          </div>
+        </section>
+      </section>
+    </section>
+
+    <section class="card chart-card">
+      <div class="chart-header">
+        <div>
+          <h2>Reliability and Failed Assets Over Time</h2>
+          <p>
+            The blue line shows reliability. The red dashed line shows the expected number
+            of failed assets over the selected period.
+          </p>
+        </div>
+
+        <div class="chart-controls">
+          <div class="chart-key">
+            <span class="key reliability-key"></span> Reliability %
+            <span class="key failed-key"></span> Failed assets
+          </div>
+
+          <button type="button" class="secondary small-button" id="downloadChartBtn">
+            Download chart PNG
+          </button>
+        </div>
+      </div>
+
+      <div class="chart-shell">
+        <svg
+          id="reliabilityChart"
+          viewBox="0 0 900 420"
+          role="img"
+          aria-label="Reliability and failed assets chart"
+        ></svg>
+
+        <div id="chartTooltip" class="chart-tooltip" hidden></div>
+      </div>
+    </section>
+
+    <section class="card table-card">
+      <h2>Year-by-Year Results</h2>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Year</th>
+              <th>Time period</th>
+              <th>Reliability</th>
+              <th>Expected surviving assets</th>
+              <th>Expected failed assets</th>
+            </tr>
+          </thead>
+          <tbody id="yearTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card formula-card">
+      <h2>Formula Used</h2>
+
+      <div class="formula-grid">
+        <div>
+          <h3>Reliability</h3>
+          <code>R(t) = e^(-λt)</code>
+          <p>
+            Reliability is the probability that one asset survives to time t without failure.
+          </p>
+        </div>
+
+        <div>
+          <h3>Expected Surviving Assets</h3>
+          <code>Survivors = N × R(t)</code>
+          <p>
+            The expected number of surviving assets equals the asset population multiplied by reliability.
+          </p>
+        </div>
+
+        <div>
+          <h3>Expected Failed Assets</h3>
+          <code>Failed assets = N × (1 - R(t))</code>
+          <p>
+            This represents the expected number of assets that experience at least one failure by time t.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card assumptions-card">
+      <h2>Model Assumptions</h2>
+
+      <ul class="assumption-list">
+        <li>
+          The simulator assumes an <strong>exponential failure distribution</strong>.
+        </li>
+        <li>
+          Failures are assumed to be <strong>random</strong> with a <strong>constant failure rate</strong>.
+        </li>
+        <li>
+          The annual failure rate is assumed to remain unchanged over the full analysis period.
+        </li>
+        <li>
+          All assets are assumed to have the same failure rate and similar operating context.
+        </li>
+        <li>
+          Failures are assumed to be statistically independent.
+        </li>
+        <li>
+          Common-cause failures, systemic failures, ageing, wear-out, infant mortality, and changing operating conditions are not included.
+        </li>
+        <li>
+          The model does not include maintenance interventions, condition monitoring, renewal, replacement, or repair strategy changes.
+        </li>
+        <li>
+          Failed assets means the expected number of assets that experience at least one failure during the period.
+        </li>
+        <li>
+          For repairable assets, this is not the same as total repeat failure events after repair.
+        </li>
+        <li>
+          Results are expected values for education and communication only, not guaranteed outcomes.
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container">
+      <p>
+        Educational simulator for explaining the relationship between annual failure rate,
+        reliability, expected failed assets, and asset population over time.
+      </p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
